@@ -21,12 +21,16 @@ if __name__ == '__main__':
     dl_dir = os.path.abspath(args.out_dir)
     df = pd.read_csv(args.liste_csv)
     for url in df['url'].values:
+        if not url.endswith('.pdf'):
+            # quickfix pour 1 URL mal formée (2020-02-27)
+            url = url + '.pdf'
         fp = '/'.join(url.split('/')[-2:])
         full_fp = os.path.join(dl_dir, fp)
         os.makedirs(os.path.dirname(full_fp), exist_ok=True)
         if os.path.exists(full_fp):
             # on ne télécharge pas le fichier si on l'a déjà
             continue
+        print(url)  # TODO progress bar?
         res = requests.get(url)
         with open(full_fp, mode='wb') as f_out:
             f_out.write(res.content)
