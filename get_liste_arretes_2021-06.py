@@ -144,11 +144,13 @@ def parse_accordion_list(driver, elt):
             # itérer sur la liste d'adresses
             for li_adr in ul_voie.find_elements_by_xpath("./li"):
                 # adresse : <a>doc1</a> - <a>doc2</a> ...
-                li_txt = li_adr.get_attribute("textContent")
+                li_txt = li_adr.get_attribute("textContent").strip()
+                li_txt = unicodedata.normalize("NFKC", li_txt)
                 adr_txt = li_txt.split(" :")[0]
                 adr_docs = li_adr.find_elements_by_xpath("./a")
                 for adr_doc in adr_docs:
-                    doc_title = adr_doc.get_attribute("textContent")
+                    doc_title = adr_doc.get_attribute("textContent").strip()
+                    doc_title = unicodedata.normalize("NFKC", doc_title)
                     doc_url = adr_doc.get_attribute("href")
                     # arrondissement, item, texte du lien, URL du lien, adresse, code postal
                     docs.append((nom_arr, li_txt, doc_title, doc_url, adr_txt, cp_arr))
