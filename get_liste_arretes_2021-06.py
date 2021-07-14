@@ -146,7 +146,30 @@ def parse_accordion_list(driver, elt):
                 # adresse : <a>doc1</a> - <a>doc2</a> ...
                 li_txt = li_adr.get_attribute("textContent").strip()
                 li_txt = unicodedata.normalize("NFKC", li_txt)
-                adr_txt = li_txt.split(" :")[0]
+                # extraction de l'adresse, parfois un autre séparateur est utilisé
+                # FIXME correctif cracra pour entrée cracra
+                if (
+                    li_txt
+                    == "Abrogation d'arrêté portant sur l'installation d'un périmètre de sécurité sur un passage privé - Parcelle N°207834 C0151"
+                ):
+                    adr_txt = "rue d'Endoume"
+                else:
+                    adr_txt = li_txt
+                    if ": " in adr_txt:
+                        adr_txt = adr_txt.split(": ")[0]
+                    if "   " in adr_txt:
+                        adr_txt = adr_txt.split("   ")[0]
+                    if "  " in adr_txt:
+                        adr_txt = adr_txt.split("  ")[0]
+                    if " - Arr" in adr_txt:
+                        adr_txt = adr_txt.split(" - ")[0]
+                    if " Arrêté" in adr_txt:
+                        adr_txt = adr_txt.split(" Arrêté")[0]
+                adr_txt = adr_txt.strip()
+                if adr_txt.endswith(" -"):
+                    # nettoyage cracra
+                    adr_txt = adr_txt[:-2]
+                #
                 adr_docs = li_adr.find_elements_by_xpath("./a")
                 for adr_doc in adr_docs:
                     doc_title = adr_doc.get_attribute("textContent").strip()
