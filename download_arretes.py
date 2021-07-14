@@ -22,6 +22,11 @@ if __name__ == "__main__":
     dl_dir = os.path.abspath(args.out_dir)
     df = pd.read_csv(args.liste_csv)
     for url in df["url"].values:
+        if not url.startswith("https://www.marseille.fr"):
+            # mauvaise URL
+            # FIXME stocker l'info de fichier manquant?
+            print(f"ERR: Mauvaise URL {url}")
+            continue
         if not url.endswith(".pdf"):
             # quickfix pour 1 URL mal formée (2020-02-27)
             url = url + ".pdf"
