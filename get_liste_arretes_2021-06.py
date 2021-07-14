@@ -163,6 +163,8 @@ def parse_accordion_list(driver, elt):
                         adr_txt = adr_txt.split("  ")[0]
                     if " - Arr" in adr_txt:
                         adr_txt = adr_txt.split(" - ")[0]
+                    if " - Abr" in adr_txt:
+                        adr_txt = adr_txt.split(" - ")[0]
                     if " Arrêté" in adr_txt:
                         adr_txt = adr_txt.split(" Arrêté")[0]
                 adr_txt = adr_txt.strip()
