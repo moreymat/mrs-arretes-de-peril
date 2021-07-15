@@ -43,6 +43,7 @@ if __name__ == "__main__":
         except:
             # FIXME stocker l'info de fichier manquant?
             print(f"ERR: Impossible d'atteindre {url}")
-            pass
-        with open(full_fp, mode="wb") as f_out:
-            f_out.write(res.content)
+            continue
+        else:
+            with open(full_fp, mode="wb") as f_out:
+                f_out.write(res.content)
