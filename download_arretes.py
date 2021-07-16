@@ -22,6 +22,7 @@ if __name__ == "__main__":
     dl_dir = os.path.abspath(args.out_dir)
     df = pd.read_csv(args.liste_csv)
     for url in df["url"].values:
+        # 2021-07 caduques fix_liste_arretes ?
         if not url.startswith("https://www.marseille.fr"):
             # mauvaise URL
             # FIXME stocker l'info de fichier manquant?
@@ -30,6 +31,7 @@ if __name__ == "__main__":
         if not url.endswith(".pdf"):
             # quickfix pour 1 URL mal formée (2020-02-27)
             url = url + ".pdf"
+        # end 2021-07 caduques fix_list_arretes
         fp = "/".join(url.split("/")[-2:])
         full_fp = os.path.join(dl_dir, fp)
         os.makedirs(os.path.dirname(full_fp), exist_ok=True)
