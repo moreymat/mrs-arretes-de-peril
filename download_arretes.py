@@ -5,6 +5,7 @@ de le re-télécharger.
 """
 
 import argparse
+from pathlib import Path
 import os.path
 
 import pandas as pd
@@ -20,18 +21,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
     #
     dl_dir = os.path.abspath(args.out_dir)
-    df = pd.read_csv(args.liste_csv)
-    for url in df["url"].values:
-        # 2021-07 caduques fix_liste_arretes ?
-        if not url.startswith("https://www.marseille.fr"):
-            # mauvaise URL
-            # FIXME stocker l'info de fichier manquant?
-            print(f"ERR: Mauvaise URL {url}")
-            continue
-        if not url.endswith(".pdf"):
-            # quickfix pour 1 URL mal formée (2020-02-27)
-            url = url + ".pdf"
-        # end 2021-07 caduques fix_list_arretes
+    # fichier interim => fichier traité
+    fp_int = Path(args.liste_csv).resolve()
+    fp_pro = fp_int.parents[1] / "processed" / fp_int.name
+    #
+    df = pd.read_csv(fp_int, dtype="string")
+    #
+    idc_urls_404 = []  # index des URLs qui ne répondent pas
+    for index, url in df["url"].dropna().items():
         fp = "/".join(url.split("/")[-2:])
         full_fp = os.path.join(dl_dir, fp)
         os.makedirs(os.path.dirname(full_fp), exist_ok=True)
@@ -45,7 +42,13 @@ if __name__ == "__main__":
         except:
             # FIXME stocker l'info de fichier manquant?
             print(f"ERR: Impossible d'atteindre {url}")
+            idc_urls_404.append(index)
             continue
         else:
             with open(full_fp, mode="wb") as f_out:
                 f_out.write(res.content)
+    df.loc[idc_urls_404, "url"] = ""
+    # on exporte le dataframe corrigé, en gardant le même format que précemment
+    # y compris les retours à la ligne du dialecte Excel du CSV Writer :
+    # https://docs.python.org/3/library/csv.html#csv.Dialect.lineterminator
+    df.to_csv(fp_pro, sep=",", index=False, line_terminator="\r\n")

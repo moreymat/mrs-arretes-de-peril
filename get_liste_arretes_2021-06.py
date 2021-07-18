@@ -1,6 +1,10 @@
 """Télécharger les arrêtés de péril depuis le site de la ville.
 
 2021-06 : les arrêtés sont maintenant classés par arrondissement, puis par rue (par ordre alphabétique)
+
+TODO
+- stocker chaque item en HTML et appliquer extract_address(), predict_doc_class() en post-traitement
+- sortir directement les classes finales
 """
 
 
