@@ -8,6 +8,12 @@ import os.path
 
 import pandas as pd
 
+# chaque arrondissement a un code postal
+ART_CP = [("1er arrondissement", "13001")] + [
+    ("{}ème arrondissement".format(i), "130{:02}".format(i)) for i in range(2, 17)
+]
+ART2CP = dict(ART_CP)
+CP2ART = {code_postal: arr for (arr, code_postal) in ART_CP}
 
 # dictionnaire de corrections manuelles
 MANUAL_FIX_URL = {
@@ -15,6 +21,8 @@ MANUAL_FIX_URL = {
     "https://www.marseille.fr/logement-urbanisme/am%C3%A9lioration-de-lhabitat/sites/default/files/contenu/logement/Mains_Levees/ml_8-rue-de-jemmapes-13001_2019_03216_vdm.pdf": "https://www.marseille.fr/sites/default/files/contenu/logement/Mains_Levees/ml_8-rue-de-jemmapes-13001_2019_03216_vdm.pdf",
     # idem, la bonne URL était enchassée dans une autre
     "https://www.marseille.fr/https://www.marseille.fr/sites/default/files/contenu/logement/Arretes-peril/6-rue-de-la-butte-13002_2019_01932.pdf/default/files/contenu/logement/Arretes-deconstruction/deconstruction_8-rue-de-la-butte-13002_2019_03064_vdm.pdf": "https://www.marseille.fr/sites/default/files/contenu/logement/Arretes-peril/6-rue-de-la-butte-13002_2019_01932.pdf",
+    # un "logement/" de trop
+    "https://www.marseille.fr/sites/default/files/contenu/logement/logement/Mains_Levees/35-rue-de-lodi-13005_2019_01521.pdf": "https://www.marseille.fr/sites/default/files/contenu/logement/Mains_Levees/35-rue-de-lodi-13005_2019_01521.pdf",
     # je n'ai pas la bonne URL
     "https://www.marseille.fr/logement-urbanisme/am%C3%A9lioration-de-lhabitat/PI_53-rue-roger-renzo-13008_2020_02689_VDM.pdf": "",
 }
@@ -69,6 +77,7 @@ def apply_manual_fixes(df, verbose=False):
     # - correction correspondant à une dépendance fonctionnelle
     for e_adr, e_cp in MANUAL_ADRESSE_TO_CP.items():
         df.loc[df["adresse"] == e_adr, "code_postal"] = e_cp
+        df.loc[df["adresse"] == e_adr, "arrondissement"] = CP2ART[e_cp]
     # corrections plus complexes :
     # - re-créer 1 ligne correcte à partir de 2 lignes incorrectes
     df.loc[
