@@ -91,6 +91,19 @@ def apply_manual_fixes(df, verbose=False):
         df.loc[((df["adresse"] == "22 rue Toussaint") & df["nom_doc"].isna())].index,
         inplace=True,
     )
+    # supprimer une ligne
+    df.drop(
+        df.loc[
+            (
+                (df["adresse"] == "29 rue Nau")
+                & (
+                    df["url"]
+                    == "https://www.marseille.fr/sites/default/files/contenu/logement/Arretes-peril/31-rue-nau-13006_2019_02300.pdf"
+                )
+            )
+        ].index,
+        inplace=True,
+    )
     #
     return df
 
