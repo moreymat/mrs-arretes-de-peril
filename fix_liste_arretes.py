@@ -3,6 +3,7 @@
 Corrections manuelles pour pallier les erreurs du site et éviter les corrections en aval.
 """
 import argparse
+from datetime import date
 from pathlib import Path
 import os.path
 
@@ -140,12 +141,15 @@ def clean(df, verbose=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "liste_csv", help="Fichier CSV raw contenant la liste des documents"
+        "--liste_csv",
+        help="Fichier CSV raw contenant la liste des documents",
+        default="data/raw/mrs-arretes-de-peril-{}.csv".format(date.today().isoformat()),
     )
+    parser.add_argument("--out_dir", help="Base output dir", default="data/interim")
     args = parser.parse_args()
     # fichier brut => fichier corrigé
     fp_raw = Path(args.liste_csv).resolve()
-    fp_fix = fp_raw.parents[1] / "interim" / fp_raw.name
+    fp_fix = Path(args.out_dir) / Path(fp_raw.stem + "_fix" + fp_raw.suffix)
     # on ouvre le fichier bugué
     df = pd.read_csv(fp_raw, dtype="string")
     df = apply_manual_fixes(df, verbose=True)

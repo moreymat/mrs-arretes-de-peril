@@ -192,60 +192,6 @@ def extract_address(li_txt):
     return adr_txt
 
 
-def predict_doc_class(doc_text):
-    """Prédit la classe d'un document, parmi les 8 possibles.
-
-    Classes :
-    * Arrêtés de péril imminent, de Main Levée et de Réintégration partielle,
-    * Arrêtés d'insécurité imminente des équipements communs,
-    * Arrêtés d'interdiction d'occuper,
-    * Arrêtés de police générale,
-    * Arrêtés d'évacuation et de réintégration,
-    * Diagnostics d'ouvrages,
-    * Arrêtés de périmètres de sécurité sur voie publique,
-    * Arrêtés de déconstruction
-
-    Parameters
-    ----------
-    doc_text : str
-        Texte du lien vers le doc
-
-    Returns
-    -------
-    doc_class : str
-        Classe du document (legacy)
-    """
-    if "péril" in doc_text:
-        doc_class = "CONSULTEZ LES DERNIERS ARRÊTÉS DE PÉRIL IMMINENT, DE MAIN LEVÉE ET DE RÉINTÉGRATION PARTIELLE DE LA VILLE DE MARSEILLE PAR ARRONDISSEMENT (ORDRE CHRONOLOGIQUE)"
-    elif "insécurité" in doc_text:
-        doc_class = "CONSULTEZ LES DERNIERS ARRÊTÉS D'INSÉCURITÉ IMMINENTE DES ÉQUIPEMENTS COMMUNS"
-    elif "interdiction d'occuper" in doc_text:
-        doc_class = "CONSULTEZ LES DERNIERS ARRÊTÉS D'INTERDICTION D'OCCUPER PAR ARRONDISSEMENT (ORDRE CHRONOLOGIQUE)"
-    elif "police générale" in doc_text:
-        doc_class = "CONSULTEZ LES DERNIERS ARRÊTÉS DE POLICE GÉNÉRALE"
-    elif "évacuation" in doc_text or "réintégration" in doc_text:
-        doc_class = "CONSULTEZ LES DERNIERS ARRÊTÉS D'ÉVACUATION ET DE RÉINTÉGRATION"
-    elif "diagnostic d'ouvrages" in doc_text:
-        doc_class = "CONSULTEZ LES DERNIERS DIAGNOSTICS D'OUVRAGES"
-    elif "périmètre de sécurité" in doc_text:
-        doc_class = (
-            "CONSULTEZ LES DERNIERS ARRÊTÉS DE PÉRIMÈTRES DE SÉCURITÉ SUR VOIE PUBLIQUE"
-        )
-    elif "déconstruction" in doc_text:
-        doc_class = "CONSULTEZ LES DERNIERS ARRÊTÉS DE DÉCONSTRUCTION"
-    # heuristique: on considère que toutes les mains-levées sont de péril (classe majoritaire)
-    elif "Main levée" in doc_text or "Main Levée" in doc_text:
-        doc_class = "CONSULTEZ LES DERNIERS ARRÊTÉS DE PÉRIL IMMINENT, DE MAIN LEVÉE ET DE RÉINTÉGRATION PARTIELLE DE LA VILLE DE MARSEILLE PAR ARRONDISSEMENT (ORDRE CHRONOLOGIQUE)"
-    # évolution réglementaire 2021
-    elif "mise en sécurité urgente" in doc_text:
-        doc_class = "Arrêtés de mise en sécurité urgente"
-    elif "mise en sécurité" in doc_text:
-        doc_class = "Arrêtés de mise en sécurité"
-    else:
-        doc_class = "?"
-    return doc_class
-
-
 def parse_arretes(
     driver: selenium.webdriver.remote.webdriver.WebDriver, url: str, outdir: str
 ):
@@ -271,8 +217,9 @@ def parse_arretes(
     div_accordions_wrapper = div_accordions_wrapper[0]
     # on extrait les documents des 16 accordéons
     docs = parse_accordion_list(driver, div_accordions_wrapper)
-    # on essaie de prédire la classe de documents
-    res = [(predict_doc_class(x[2]), x[0], x[1], x[2], x[3], x[4], x[5]) for x in docs]
+    # 2021-06 la classe de documents n'est plus fournie, on garde le champ pour rétro-compatibilité
+    # mais on prédira sa valeur après (voir enrich_liste_arretes)
+    res = [("?", x[0], x[1], x[2], x[3], x[4], x[5]) for x in docs]
     return res
 
 
@@ -305,7 +252,7 @@ def dump_doc_list(docs, fn_out):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("out_dir", help="Base output dir")
+    parser.add_argument("--out_dir", help="Base output dir", default="data/raw")
     args = parser.parse_args()
     # dossier de base pour stocker les documents téléchargés
     dl_dir = os.path.abspath(args.out_dir)

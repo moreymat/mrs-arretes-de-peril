@@ -5,6 +5,7 @@ de le re-télécharger.
 """
 
 import argparse
+from datetime import date
 from pathlib import Path
 import os.path
 
@@ -15,17 +16,28 @@ import requests
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "liste_csv", help="Fichier CSV contenant la liste des documents"
+        "--liste_csv",
+        help="Fichier CSV interim contenant la liste des documents",
+        default="data/interim/mrs-arretes-de-peril-{}_enr.csv".format(
+            date.today().isoformat()
+        ),
     )
-    parser.add_argument("out_dir", help="Base output dir")
+    parser.add_argument(
+        "--out_dir",
+        help="Dossier de sortie pour le CSV traité",
+        default="data/processed",
+    )
+    parser.add_argument(
+        "--doc_dir", help="Dossier de stockage des documents", default="data/arretes"
+    )
     args = parser.parse_args()
     #
-    dl_dir = os.path.abspath(args.out_dir)
+    dl_dir = os.path.abspath(args.doc_dir)
     # fichier interim => fichier traité
-    fp_int = Path(args.liste_csv).resolve()
-    fp_pro = fp_int.parents[1] / "processed" / fp_int.name
+    fp_in = Path(args.liste_csv).resolve()
+    fp_out = Path(args.out_dir) / Path(fp_in.name.rsplit("_", 1)[0] + fp_in.suffix)
     #
-    df = pd.read_csv(fp_int, dtype="string")
+    df = pd.read_csv(fp_in, dtype="string")
     #
     idc_urls_404 = []  # index des URLs qui ne répondent pas
     for index, url in df["url"].dropna().items():
@@ -51,4 +63,4 @@ if __name__ == "__main__":
     # on exporte le dataframe corrigé, en gardant le même format que précemment
     # y compris les retours à la ligne du dialecte Excel du CSV Writer :
     # https://docs.python.org/3/library/csv.html#csv.Dialect.lineterminator
-    df.to_csv(fp_pro, sep=",", index=False, line_terminator="\r\n")
+    df.to_csv(fp_out, sep=",", index=False, line_terminator="\r\n")
