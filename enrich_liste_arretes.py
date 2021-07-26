@@ -52,6 +52,9 @@ M_PERIM = re.compile(RE_PERIM, re.IGNORECASE)
 RE_INTER_OCCUP = r"(inte[r]?diction.*)?d'occup"
 M_INTER_OCCUP = re.compile(RE_INTER_OCCUP, re.IGNORECASE)
 #
+RE_MSU = r"mi[s]?e en séc(ur|ru)it[t]?é urgente"
+M_MSU = re.compile(RE_MSU, re.IGNORECASE)
+#
 RE_MISE_SECU = r"mi[s]?e en séc(ur|ru)it[t]?é"
 M_MISE_SECU = re.compile(RE_MISE_SECU, re.IGNORECASE)
 # restent :
@@ -113,10 +116,10 @@ def predict_doc_class(doc_text):
         doc_class = "Arrêtés de péril imminent"
     elif M_PERIL_GI.search(doc_text):
         doc_class = "Arrêtés de péril grave et imminent"
-    elif M_PERIL.search(doc_text):
-        # heuristique : "péril" (sans plus de précision) est ici "péril imminent"
-        # TODO vérifier si cette heuristique tient
-        doc_class = "Arrêtés de péril imminent"
+    # elif M_PERIL.search(doc_text):
+    # heuristique : "péril" (sans plus de précision) est ici "péril imminent"
+    # TODO vérifier si cette heuristique tient
+    # doc_class = "Arrêtés de péril imminent"
     elif "insécurité" in doc_text:
         doc_class = "Arrêtés d'insécurité imminente des équipements communs"
     elif M_INTER_OCCUP.search(doc_text):
@@ -132,7 +135,7 @@ def predict_doc_class(doc_text):
     elif "déconstruction" in doc_text:
         doc_class = "Arrêtés de déconstruction"
     # évolution réglementaire 2021
-    elif "mise en sécurité urgente" in doc_text:
+    elif M_MSU.search(doc_text):
         doc_class = "Arrêtés de mise en sécurité urgente"
     elif M_MISE_SECU.search(doc_text):
         doc_class = "Arrêtés de mise en sécurité"
@@ -140,6 +143,20 @@ def predict_doc_class(doc_text):
     else:
         doc_class = "?"
     return doc_class
+
+
+# péril simple
+RE_PS = r"[/_-]ps[/_-]"
+M_PS = re.compile(RE_PS, re.IGNORECASE)
+# péril ordinaire
+RE_PO = r"[/_-]po[/_-]"
+M_PO = re.compile(RE_PO, re.IGNORECASE)
+# péril imminent
+RE_PI = r"[/_-]pi[/_-]"
+M_PI = re.compile(RE_PI, re.IGNORECASE)
+# péril grave et imminent
+RE_PGI = r"[/_-]pgi[/_-]"
+M_PGI = re.compile(RE_PGI, re.IGNORECASE)
 
 
 def guess_doc_class(s_row):
@@ -157,9 +174,18 @@ def guess_doc_class(s_row):
     doc_class : string
         Classe du document
     """
-    if "pgi" in s_row["url"]:
+    if M_PGI.search(s_row["url"]):
         # péril grave et imminent
         doc_class = "Arrêtés de péril grave et imminent"
+    elif M_PI.search(s_row["url"]):
+        # péril imminent
+        doc_class = "Arrêtés de péril imminent"
+    elif M_PO.search(s_row["url"]):
+        # péril ordinaire
+        doc_class = "Arrêtés de péril ordinaire"
+    elif M_PS.search(s_row["url"]):
+        # péril simple
+        doc_class = "Arrêtés de péril simple"
     elif "mlpi" in s_row["url"]:
         # mainlevée de péril imminent
         # TODO préciser le péril imminent dans la classe ?
@@ -184,12 +210,11 @@ def guess_doc_class(s_row):
     elif "perimetre" in s_row["url"]:
         # périmètre de sécurité
         doc_class = "Arrêtés de périmètres de sécurité sur voie publique"
-    elif "pi" in s_row["url"]:
-        # péril imminent
-        # motif à appliquer en dernier car trop peu spécifique, risque de capture involontaire
-        doc_class = "Arrêtés de péril imminent"
     else:
-        doc_class = "?"
+        # 2021-07-26 : 199 occurrences "?"
+        # heuristique => "péril grave et imminent"
+        # doc_class = "?"
+        doc_class = "Arrêtés de péril grave et imminent"
     return doc_class
 
 
@@ -231,6 +256,14 @@ FIX_URL_DOC_CLASS = {
     "301-avenue-de-la-capelette-13010_2019_02297.pdf": "Arrêtés de péril grave et imminent",
     "ordonnance_37-boulevard-gilly-13010.pdf": "Ordonnances du Tribunal Administratif",
     "ML-1-TRAVERSE-DE-LA-JULIETTE_2018_03192.pdf": "Arrêtés de mainlevée",  # de péril imminent
+    "19-24-DOMAINE-VENTRE-13001_2019_00537.pdf": "Arrêtés de péril grave et imminent",
+    "po_2020_01674_-4-ruepytheas-13001-vdm.pdf": "Arrêtés de péril ordinaire",
+    "4-rue-pytheas-arrete_pi_2018_02930-final.pdf": "Arrêtés de péril imminent",
+    "pgi_14-cours-saint-louis_2-rue-de-rome_2-rue-rouget-de-l-isle_2019_04210_vdm.pdf": "Arrêtés de péril grave et imminent",
+    "24-rue-de-la-bibliotheque-13001_po_2020_02957_10-12-20.pdf": "Arrêtés de péril ordinaire",
+    "43-rue-curiol-13001_2019_01315_vdm.pdf": "Arrêtés de péril grave et imminent",
+    "45-rue-curiol-13001_2019_01314.pdf": "Arrêtés de péril grave et imminent",
+    "ps_29-rue-des-dominicaines-13001_2019_03108_vdm.pdf": "Arrêtés de péril simple",
 }
 
 
