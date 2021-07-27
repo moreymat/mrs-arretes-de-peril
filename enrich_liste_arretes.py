@@ -264,6 +264,9 @@ FIX_URL_DOC_CLASS = {
     "43-rue-curiol-13001_2019_01315_vdm.pdf": "Arrêtés de péril grave et imminent",
     "45-rue-curiol-13001_2019_01314.pdf": "Arrêtés de péril grave et imminent",
     "ps_29-rue-des-dominicaines-13001_2019_03108_vdm.pdf": "Arrêtés de péril simple",
+    "108-avenue-des-chartreux_2021_00263.pdf": "Arrêtés de mise en sécurité urgente",
+    "103-avenue-roger-salengro-13003-2020_02856.pdf": "Arrêtés de péril imminent",
+    "42-rue-de-bruys-13005_2018_03303.pdf": "Arrêtés de péril imminent",
 }
 
 
@@ -338,6 +341,11 @@ FIX_DATE_LINK = {
     "po_28-rue-des-trois-rois-13006_2020_02117_vdm.pdf": "24/09/2020",  # "24/09"
     "ppm-53-rue-roger-renzo-13008-n2020_02620.pdf": "09/11/2020",  # "9/11/2020"
     "ML-1-TRAVERSE-DE-LA-JULIETTE_2018_03192.pdf": "07/12/2018",  # "7/12/2018"
+    "15-rue-du-jet-d-eau-13003_pgi_2019_02875.pdf": "14/08/2019",  # "14/08/20219"
+    "7-rue-des-cartiers-13002_ppm-2021_00034.pdf": "07/01/2021",  # "07/11/2021"
+    "ml-partielle_pgi_4-rue-beaussenque-13002_2019_02551.pdf": "22/07/2019",  # "22/07/21019"
+    "42-rue-de-bruys-13005_2018_03303.pdf": "12/12/2018",  # "18/12/2020"
+    "73-chemin-de-st-henri-13016_2021_01956.pdf": "17/07/2021",  #
 }
 
 
