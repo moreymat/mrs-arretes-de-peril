@@ -1,6 +1,9 @@
 """Corrige la liste d'arrêtés.
 
 Corrections manuelles pour pallier les erreurs du site et éviter les corrections en aval.
+
+TODO
+- [ ] comparer l'ensemble des URLs de versions récentes, avec celle de l'ancien site (2021-03) voire du précédent (2020-02), a priori il y a eu des pertes
 """
 import argparse
 from datetime import date
@@ -26,6 +29,13 @@ MANUAL_FIX_URL = {
     "https://www.marseille.fr/sites/default/files/contenu/logement/logement/Mains_Levees/35-rue-de-lodi-13005_2019_01521.pdf": "https://www.marseille.fr/sites/default/files/contenu/logement/Mains_Levees/35-rue-de-lodi-13005_2019_01521.pdf",
     # je n'ai pas la bonne URL
     "https://www.marseille.fr/logement-urbanisme/am%C3%A9lioration-de-lhabitat/PI_53-rue-roger-renzo-13008_2020_02689_VDM.pdf": "",
+}
+
+MANUAL_FIX_ADRESSE_NOMDOC_URL = {
+    (
+        "23 rue de la Palud",
+        "Arrêté dé péril grave et imminent du 14/03/2019",
+    ): "https://www.marseille.fr/sites/default/files/contenu/logement/Arretes-peril/23-rue-de-la-palud_13001_2019_00917.pdf",
 }
 
 # TODO correction d'adresses automatique ?
@@ -79,6 +89,11 @@ def apply_manual_fixes(df, verbose=False):
     for e_adr, e_cp in MANUAL_ADRESSE_TO_CP.items():
         df.loc[df["adresse"] == e_adr, "code_postal"] = e_cp
         df.loc[df["adresse"] == e_adr, "arrondissement"] = CP2ART[e_cp]
+    # - adresse et nom_doc => URL
+    for (e_adr, e_nomdoc), url_fix in MANUAL_FIX_ADRESSE_NOMDOC_URL.items():
+        df.loc[
+            ((df["adresse"] == e_adr) & (df["nom_doc"] == e_nomdoc)), "url"
+        ] = url_fix
     # corrections plus complexes :
     # - re-créer 1 ligne correcte à partir de 2 lignes incorrectes
     df.loc[
